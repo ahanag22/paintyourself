@@ -1,0 +1,359 @@
+package gui;
+
+import com.sun.glass.events.KeyEvent;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+
+import javax.swing.ButtonGroup;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JSeparator;
+import javax.swing.JSlider;
+import javax.swing.KeyStroke;
+import javax.swing.SwingConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import painting.CustomActionListener;
+import painting.DrawingPanel;
+import shapes.Ellipse;
+import shapes.Line;
+import shapes.Pencil;
+import shapes.Rectangle;
+import shapes.ShapingToolAbstract;
+
+
+/**
+ * @author Ahana Ghosh
+ * @version Autumn 2015
+ * A class that creates menu bar.
+ */
+public class Menu {
+    // static fields
+    /** JSlider maximum value. */
+    private static final int SLIDER_MAX = 20;
+    /** JSlider major tick gap. */
+    private static final int SLIDER_MAJOR_TICK = 5;
+    /** JSlider minor tick gap. */
+    private static final int SLIDER_MINOR_TICK = 1;
+    //instance fields
+    /** A DrawingmyPanel. */
+    private DrawingPanel myPanel;
+    /** A JMenuItem. */
+    private JMenuItem myUndoAll;
+    /** A JMenuItem. */
+    private JMenuItem myUndo;
+    /** A JMenuItem. */
+    private JMenuItem myRedo;
+    
+    /** Initially selected thickness of the shapes. */
+    private int myWidth = 1;
+    /** A ButtonGroup. */
+    private ButtonGroup myGroup;
+    /** A RadioButtonMenuItem. */
+    private JRadioButtonMenuItem myRbMenuItem1;
+    /** A RadioButtonMenuItem. */
+    private JRadioButtonMenuItem myRbMenuItem2;
+    /** A RadioButtonMenuItem. */
+    private JRadioButtonMenuItem myRbMenuItem3;
+    /** A RadioButtonMenuItem. */
+    private JRadioButtonMenuItem myRbMenuItem4;
+   
+   /**
+    * This method add all the menus to the menu bar.
+    * @param thePanel is a DrawingPanel.
+    * @return it returns JMenu.
+    */
+    public JMenuBar createMenuBar(final DrawingPanel thePanel) {
+        // Record the Drawing myPanel
+        myPanel = thePanel;
+        
+        //Create the menu bar.
+        final JMenuBar bar = new JMenuBar();
+        bar.add(createFileMenu(thePanel));
+        bar.add(createOptionMenu());
+        bar.add(createToolsMenu());
+        bar.add(createHelpMenu());
+       
+        return bar;
+    }
+    /**
+     * a getter method.
+     * @return JMenuItem.
+     */
+    public JMenuItem getUndo() {
+        return this.myUndoAll;
+    }
+    /**
+     * set redo state.
+     * @param theVal is boolean
+     */
+    public void setRedoState(final boolean theVal) {
+        this.myRedo.setEnabled(theVal);
+    }
+    /**
+     * set undo state.
+     * @param theVal is boolean
+     */
+    public void setUndoAllState(final boolean theVal) {
+        this.myUndoAll.setEnabled(theVal);
+    }    
+    /**
+     * set undo state.
+     * @param theVal is boolean
+     */
+    public void setUndoState(final boolean theVal) {
+        this.myUndo.setEnabled(theVal);
+    }
+      /**
+       * A helper method that creates File menu.
+       * @param thePanel is a DrawingPanel.
+       * @return it returns JMenu
+       */
+    private JMenu createFileMenu(final DrawingPanel thePanel) {
+        //Create the menu bar.
+        final JMenuBar bar = new JMenuBar();
+        //Build the first menu.
+        final JMenu menu = new JMenu("File");
+        menu.setMnemonic(KeyEvent.VK_F);
+        bar.add(menu);
+        //Build the menu items under File menu.
+        myUndoAll = new JMenuItem("Undo all changes");
+        //set mnemonic
+        myUndoAll.setMnemonic(KeyEvent.VK_U);
+        // should be disabled when there is no shape to undo.
+        menu.add(myUndoAll).setEnabled(false);
+        // should be enabled when user draws a shape.
+        if (thePanel.isGetDraggedState()) {
+            myUndoAll.setEnabled(true);
+        }
+        //adding action
+        myUndoAll.addActionListener(new ActionListener() {
+            public void actionPerformed(final ActionEvent theEvent) {
+                //removes all drawn shapes.
+                myPanel.clearAllDrawings();
+                setUndoAllState(false);
+                setUndoState(false);
+                }
+            });
+        
+        menu.add(new JSeparator()); // SEPARATOR
+        
+        //build next menu item.
+        myUndo = new JMenuItem("Undo", 'O');
+        //set ACcelerator keys
+        myUndo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_MASK));
+        
+        //adding action
+        myUndo.addActionListener(new ActionListener() {
+            public void actionPerformed(final ActionEvent theEvent) {
+                //removes all drawn shapes.
+                myPanel.undoLast();
+                }
+            });
+        
+        //should be disabled when there is no shape to undo.
+        menu.add(myUndo).setEnabled(false);
+        menu.add(myUndo);
+        
+        menu.add(new JSeparator()); // SEPARATOR
+        
+        //build next menu item.
+        myRedo = new JMenuItem("Redo", 'D');
+        //set ACcelerator keys
+        myRedo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK));
+        
+        //adding action
+        myRedo.addActionListener(new ActionListener() {
+            public void actionPerformed(final ActionEvent theEvent) {
+                //removes all drawn shapes.
+                myPanel.redoLast();
+                }
+            });
+        
+        //only enable after undo action.
+        menu.add(myRedo).setEnabled(false);
+        menu.add(myRedo);
+        menu.add(new JSeparator()); // SEPARATOR
+        
+        //build exit menu item.
+        final JMenuItem exit = new JMenuItem("Exit");
+        // set mnemonic
+        exit.setMnemonic(KeyEvent.VK_X);
+        //adding action
+        exit.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent theEvent) {
+                //exits the program.
+                System.exit(0);
+            }
+        });
+        menu.add(exit);
+        return menu;
+    }
+      /**
+       * A private helper method that creates Option menu.
+       * @return it returns JMenu
+       */
+    private JMenu createOptionMenu() {
+        //Create the menu bar.
+        final JMenuBar bar = new JMenuBar();
+        //Build the second menu.
+        final JMenu menu2 = new JMenu("Options");
+        menu2.setMnemonic(KeyEvent.VK_O);
+        bar.add(menu2);
+        //Build check box menu item.
+        final JCheckBoxMenuItem grid = new JCheckBoxMenuItem("Grid");
+        // set mnemonic.
+        grid.setMnemonic(KeyEvent.VK_G);
+        //adding action
+        grid.addActionListener(new ActionListener() {
+            public void actionPerformed(final ActionEvent theEvent) {
+                //creates a grid of gray lines.
+                myPanel.changeGridState();
+                myPanel.repaint();
+            }
+        });
+        menu2.add(grid);
+        menu2.add(new JSeparator()); // SEPARATOR
+        // a sub menu containing a JSlider.
+        final JMenu submenu = new JMenu("Thickness");
+        //set mnemonic
+        submenu.setMnemonic(KeyEvent.VK_T);
+        //set up the properties of the slider
+        final JSlider js = new JSlider(SwingConstants.HORIZONTAL, 0, SLIDER_MAX, 1); 
+        //Turn on labels at major tick marks.
+        js.setMajorTickSpacing(SLIDER_MAJOR_TICK);
+        js.setMinorTickSpacing(SLIDER_MINOR_TICK);
+        js.setPaintTicks(true);
+        js.setPaintLabels(true);
+        js.addChangeListener(new ChangeListener() {
+            /** Called in response to slider events in this window. */
+            @Override
+            public void stateChanged(final ChangeEvent theEvent) {
+                final int value = js.getValue();
+                if (value >= 0) {
+                    myWidth = value;
+                    myPanel.setWidth(myWidth);
+                }
+            }
+        });
+      
+        submenu.add(js);
+        menu2.add(submenu);
+        menu2.add(new JSeparator()); // SEPARATOR
+        // a menu item which invokes a color chooser dialog.
+        final JMenuItem color = new JMenuItem("Colors...");
+        //set mnemonic
+        color.setMnemonic(KeyEvent.VK_C);
+       // adding action
+        color.addActionListener(new ActionListener() {
+            public void actionPerformed(final ActionEvent theEvent) {
+                //color is set to be used for the future drawing.
+                myPanel.setColor();
+                //custom icon always display currently selected color.
+                final ColorAction ca = new ColorAction(myPanel.getColor());
+                color.setIcon(ca);
+                
+            }
+        });
+        
+        menu2.add(color);
+        return menu2;
+    }
+  
+      /**
+       * a helper method that creates Tools menu.
+       * @return it returns JMenu
+       */
+    public JMenu createToolsMenu() {
+        //Create the menu bar.
+        final JMenuBar bar = new JMenuBar();
+        //Build the third menu.
+        final JMenu menu3 = new JMenu("Tools");
+        //set mnemonic
+        menu3.setMnemonic(KeyEvent.VK_T);
+        bar.add(menu3);
+        this.myGroup = new ButtonGroup();
+        
+        this.myRbMenuItem1 = new JRadioButtonMenuItem("Pencil");
+        this.myGroup.add(this.myRbMenuItem1);
+        this.myRbMenuItem1.setMnemonic(KeyEvent.VK_P);
+        this.myRbMenuItem1.addActionListener(new CustomActionListener(new Pencil(), myPanel));
+        menu3.add(this.myRbMenuItem1);
+        this.myRbMenuItem1.setSelected(true);
+        
+        this.myRbMenuItem2 = new JRadioButtonMenuItem("Line");
+        this.myGroup.add(this.myRbMenuItem2);
+        this.myRbMenuItem2.setMnemonic(KeyEvent.VK_L);
+        this.myRbMenuItem2.addActionListener(new CustomActionListener(new Line(), myPanel));
+        menu3.add(this.myRbMenuItem2);
+        
+        this.myRbMenuItem3 = new JRadioButtonMenuItem("Rectangle");        
+        this.myGroup.add(this.myRbMenuItem3);
+        this.myRbMenuItem3.setMnemonic(KeyEvent.VK_R);
+        this.myRbMenuItem3.addActionListener(new CustomActionListener(new Rectangle(), 
+                                                                      myPanel));
+        menu3.add(this.myRbMenuItem3);
+        
+        this.myRbMenuItem4 = new JRadioButtonMenuItem("Ellipse");
+        this.myGroup.add(this.myRbMenuItem4);
+        this.myRbMenuItem4.setMnemonic(KeyEvent.VK_E);
+        this.myRbMenuItem4.addActionListener(new CustomActionListener(new Ellipse(), myPanel));
+        menu3.add(this.myRbMenuItem4);
+        
+        return menu3;
+    }
+     /**
+      * 
+      * @param theTool is a ShapingTool
+      */
+    public void setSelected(final ShapingToolAbstract theTool) {
+        if (theTool instanceof Pencil) {
+            this.myGroup.setSelected(this.myRbMenuItem1.getModel(), true);
+        } else if (theTool instanceof Line) {
+            this.myGroup.setSelected(this.myRbMenuItem2.getModel(), true);
+        } else if (theTool instanceof Rectangle) {
+            this.myGroup.setSelected(this.myRbMenuItem3.getModel(), true);
+        } else if (theTool instanceof Ellipse) {
+            this.myGroup.setSelected(this.myRbMenuItem4.getModel(), true);
+        }
+    }
+     
+      /**
+       * a helper method that creates Help menu.
+       * @return it returns JMenu
+       */
+    private JMenu createHelpMenu() {
+          //Create the menu bar.
+        final JMenuBar bar = new JMenuBar();
+          //Build the fourth menu.
+        final JMenu menu4 = new JMenu("Help");
+        menu4.setMnemonic(KeyEvent.VK_H);
+        bar.add(menu4);
+        final JMenuItem about = new JMenuItem("About...");
+        about.setMnemonic(KeyEvent.VK_A);
+        about.addActionListener(new ActionListener() {
+            public void actionPerformed(final ActionEvent theEvent) {
+                helpMsg(); 
+            }
+        });
+        menu4.add(about);
+        return menu4;
+    }
+      
+       /**
+       * a helper method that helps to pop up a message.
+       */
+    private void helpMsg() {
+        JOptionPane.showMessageDialog(new DrawingFrame(), "TCSS 305 PowerPaint, Autumn 2015");
+          
+    }
+  
+    
+}
+

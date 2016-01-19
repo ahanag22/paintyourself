@@ -1,0 +1,291 @@
+package painting;
+
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import javax.swing.event.MouseInputAdapter;
+
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Line2D;
+import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import gui.*;
+class Figure{
+    
+    int type;
+    Color c;
+    int width;
+    
+    ArrayList<Integer> ax = new ArrayList<Integer>();
+    ArrayList<Integer> ay = new ArrayList<Integer>();
+
+    
+    public Figure(int x1, int y1, int x2, int y2, int type, Color c, int width)
+    {
+        this.ax.add(x1);
+        this.ay.add(y1);
+        this.ax.add(x2);
+        this.ay.add(y2);
+        
+        this.type = type;
+        this.c = c;
+        this.width = width;
+    }
+    
+    public Figure(int type, Color c, int width)
+    {
+        this.type = type;
+        this.c = c;
+        this.width = width;
+    }
+    
+    public void AddPoint(int x, int y)
+    {
+        ax.add(x);
+        ay.add(y);
+    }
+}
+
+public class DrawingPanel extends JPanel
+{
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+    /** The default pane width. */
+    private static final int PANE_WIDTH = 400;
+    
+    /** The default pane width. */
+    private static final int PANE_HEIGHT = 200;
+    
+    private int x1,x2,y1,y2;
+    private int type = 1;
+    private Color c = Color.BLACK;
+    private int width = 1;
+    public boolean drageStarged = false;
+
+    
+    private ArrayList<Figure> drawnFigures;
+    
+    private JMenuItem undoMenuItem; 
+    
+    public DrawingPanel()
+    {
+        init();
+       
+        drawnFigures = new ArrayList<Figure>();
+    }
+    
+    public void init(){
+          setBackground(Color.WHITE);
+          setPreferredSize(new Dimension(PANE_WIDTH, PANE_HEIGHT));
+          final MouseInputAdapter mia = new MyMouseInputAdapter();
+          
+          //Register for mouse events on the panel.
+          addMouseListener(mia);
+          addMouseMotionListener(mia);
+       
+    }
+    
+    public void linkUndoItem(JMenuItem undo)
+    {
+        this.undoMenuItem = undo;
+    }
+    
+    public void setType(int arg){
+        if(arg == 1){
+            type = 1;
+        }else if(arg == 2){
+            type = 2;
+        }
+        else if(arg == 3) {
+             type = 3;
+        }
+        else if(arg == 4) {
+            type = 4;
+        }
+    }
+    
+    public void setColor(){
+        this.c = openChooser();
+    }
+    
+    public Color openChooser() {
+        return JColorChooser.showDialog(new DrawingFrame(), "Choose your color", Color.black);       
+   }
+    
+    public void setWidth(int width) {
+     this.width = width;
+    }
+    
+    private int getType(){
+        return this.type;
+    }
+    
+    private void setUndoItemState(boolean flag)
+    {
+        this.undoMenuItem.setEnabled(flag);
+    }
+    
+    private void removeLast()
+    {
+        if(this.drawnFigures.size() > 0)
+            this.drawnFigures.remove(this.drawnFigures.size() - 1);
+    }
+    
+    private void addThis()
+    {
+        Figure thisFigure = new Figure(x1, y1, x2, y2, type, c, width);
+        this.drawnFigures.add(thisFigure);
+    }
+   
+    private void addThisToLast()
+    {
+        this.drawnFigures.get(this.drawnFigures.size() - 1).AddPoint(this.x2, this.y2);
+    }
+    
+    private void setDragStarted(boolean flag)
+    {
+        this.drageStarged = flag;
+    }
+    
+    public void paintComponent(Graphics g)
+    { 
+        super.paintComponent(g);
+        
+        for(Figure f: this.drawnFigures)
+        {
+            if(f.type == 1)
+            {
+                g.setColor(f.c);
+                ((Graphics2D)g).setStroke(new BasicStroke(f.width));
+                for(int i = 0; i < f.ax.size() - 1; i++) {
+                    g.drawLine(f.ax.get(i), f.ay.get(i), f.ax.get(i+1), f.ay.get(i+1));
+                    
+                }                
+            }
+            else if (f.type == 2) {
+                g.setColor(f.c);
+                ((Graphics2D)g).setStroke(new BasicStroke(f.width));
+                ((Graphics2D)g).draw(new Line2D.Double(f.ax.get(0), f.ay.get(0), f.ax.get(1), f.ay.get(1)));
+               
+            }
+            else if (f.type == 3) {              
+                g.setColor(f.c);
+                ((Graphics2D)g).setStroke(new BasicStroke(f.width));
+                
+               
+                int x = Math.min(f.ax.get(0),f.ax.get(1));
+                int y = Math.min(f.ay.get(0),f.ay.get(1));
+                int rectWidth = Math.abs(f.ax.get(1) - f.ax.get(0));
+                int rectHeight = Math.abs(f.ay.get(1) - f.ay.get(0));
+                
+                ((Graphics2D)g).draw(new Rectangle2D.Double(x,y, rectWidth,rectHeight)); 
+                
+            }
+            else if (f.type == 4) {
+                g.setColor(f.c);
+                ((Graphics2D)g).setStroke(new BasicStroke(f.width));
+                
+                int x = Math.min(f.ax.get(0),f.ax.get(1));
+                int y = Math.min(f.ay.get(0),f.ay.get(1));
+                int rectWidth = Math.abs(f.ax.get(1) - f.ax.get(0));
+                int rectHeight = Math.abs(f.ay.get(1) - f.ay.get(0));
+               
+                
+                ((Graphics2D)g).draw(new Ellipse2D.Double(x, y, rectWidth, rectHeight));               
+            }
+        }
+       
+        int noOfVerticalLines = this.getWidth()/10;
+        for(int i = 0; i < noOfVerticalLines; i++){
+            g.setColor(Color.BLACK);
+            ((Graphics2D)g).setStroke(new BasicStroke(1));
+            repaint();
+        }
+        int noOfHorizontalLines = this.getHeight()/10;
+        for(int i = 0; i < noOfHorizontalLines; i++){
+            g.setColor(Color.BLACK);
+            ((Graphics2D)g).setStroke(new BasicStroke(1));
+            repaint();
+    }
+    }
+    
+    
+    public void clearAllDrawings()
+    {
+        this.drawnFigures.clear();
+        repaint();
+        setUndoItemState(false);
+    }
+class MyMouseInputAdapter extends MouseInputAdapter {
+        
+        //these methods are found in MouseListener
+        @Override
+        public void mousePressed(final MouseEvent m) {
+            x1 = m.getX();
+            y1 = m.getY();
+            repaint();
+        }
+        
+        @Override
+        public void mouseReleased(final MouseEvent m) {
+            x2 = m.getX();
+            y2 = m.getY();                  
+          
+            setDragStarted(false);
+         
+        }
+        
+        @Override
+        public void mouseEntered(final MouseEvent theEvent) {
+           
+        }
+        
+        @Override
+        public void mouseExited(final MouseEvent theEvent) {
+            
+        }
+        
+        @Override
+        public void mouseClicked(final MouseEvent theEvent) {
+            
+        }
+        
+        //These methods are found in MouseMotionListener
+        @Override
+        public void mouseMoved(final MouseEvent theEvent) {
+          
+        }
+        
+        @Override
+        public void mouseDragged(final MouseEvent m) {
+            x2 = m.getX();
+            y2 = m.getY();
+            
+            if(drageStarged)
+            {
+                if(getType() != 1 )
+                {
+                    removeLast(); 
+                    addThis();
+                }
+                else
+                {
+                    addThisToLast();
+                }
+            }
+            else
+            {
+                addThis();                                                  
+            }
+            
+            repaint();                     
+            setDragStarted(true);                     
+            setUndoItemState(true);
+        }
+     
+        }
+}
+
+

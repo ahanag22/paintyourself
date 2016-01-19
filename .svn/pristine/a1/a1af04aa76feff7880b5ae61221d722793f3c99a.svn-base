@@ -1,0 +1,249 @@
+package painting;
+import com.sun.glass.events.KeyEvent;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+
+import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JColorChooser;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JSeparator;
+import javax.swing.JSlider;
+import javax.swing.JToggleButton;
+import javax.swing.JToolBar;
+import javax.swing.SwingConstants;
+
+/**
+ * This class extends a JFrame and creates menu bar and tool bar.
+ * @author Ahana Ghosh
+ * @version Autumn 2015
+ */
+public class Components extends JFrame {
+  /**  A generated serial version UID for object Serialization. */
+    private static final long serialVersionUID = -720269455962703613L;
+    
+    /** This image is used as window icon. */
+    private static final String IMAGE_SOURCE = ".\\images\\w.gif";
+    /** JSlider maximum value. */
+    private static final int SLIDER_MAX = 20;
+    /** Tool name. */
+    private static final String PENCIL = "Pencil";
+    /** Tool name. */
+    private static final String LINE = "Line"; 
+    /** Tool name. */
+    private static final String RECTANGLE = "rectangle";
+    /** Tool name. */
+    private static final String ELLIPSE = "Ellipse";
+
+/**
+ * This is a constructor.
+ * constructor is taking no parameters.
+ */
+    public Components() {
+        super("Power Paint");        
+        final File iconImageFile = new File(IMAGE_SOURCE);
+        final String iconImageFilePath = iconImageFile.getAbsolutePath();
+        final ImageIcon img = new ImageIcon(iconImageFilePath);
+        this.setIconImage(img.getImage());
+        
+    }
+    /**
+     * this method calls private helper methods.
+     */
+    public void start() {
+        
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+      
+     
+        setJMenuBar(createMenuBar());
+        //Create and set up the content pane.
+        final DrawingPanel drawingArea = new DrawingPanel();  
+        
+        add(drawingArea,  BorderLayout.CENTER);
+        add(createToolBar(), BorderLayout.PAGE_END);
+        //Display the window.
+        setResizable(true);
+        pack();
+        setVisible(true);     
+    }
+    /**
+     * This method creates a menu.
+     * It calls four helper methods.
+     * @return it returns JMenuBar 
+     */
+    private JMenuBar createMenuBar() {
+      //Create the menu bar.
+        final JMenuBar bar = new JMenuBar();
+        bar.add(createFileMenu());
+        bar.add(createOptionMenu());
+        bar.add(createToolsMenu());
+        bar.add(createHelpMenu());
+     
+        return bar;
+    }
+    /**
+     * a helper method that creates File menu.
+     * @return it returns JMenu
+     */
+    private JMenu createFileMenu() {
+      //Create the menu bar.
+        final JMenuBar bar = new JMenuBar();
+      //Build the first menu.
+        final JMenu menu = new JMenu("File");
+        menu.setMnemonic(KeyEvent.VK_F);
+        bar.add(menu);
+      //Build group of menu items.
+        final JMenuItem undo = new JMenuItem("Undo all changes");
+        undo.setMnemonic(KeyEvent.VK_U);
+        menu.add(undo);
+        menu.add(new JSeparator()); // SEPARATOR
+        final JMenuItem exit = new JMenuItem("Exit");
+        exit.setMnemonic(KeyEvent.VK_X);
+        exit.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent theEvent) {
+                System.exit(0);
+            }
+        });
+        menu.add(exit);
+        return menu;
+    }
+    /**
+     * a helper method that creates Option menu.
+     * @return it returns JMenu
+     */
+    private JMenu createOptionMenu() {
+        //Create the menu bar.
+        final JMenuBar bar = new JMenuBar();
+      //Build the second menu.
+        final JMenu menu2 = new JMenu("Options");
+        menu2.setMnemonic(KeyEvent.VK_O);
+        bar.add(menu2);
+      //Build check box menu item.
+        final JCheckBoxMenuItem grid = new JCheckBoxMenuItem("Grid");
+        grid.setMnemonic(KeyEvent.VK_G);
+        menu2.add(grid);
+        menu2.add(new JSeparator()); // SEPARATOR
+        final JMenu submenu = new JMenu("Thickness");
+        submenu.setMnemonic(KeyEvent.VK_T);
+       
+        submenu.add(new JSlider(SwingConstants.HORIZONTAL, 0, SLIDER_MAX, 1));
+        menu2.add(submenu);
+        menu2.add(new JSeparator()); // SEPARATOR
+        final JMenuItem color = new JMenuItem("Colors...");
+        color.setMnemonic(KeyEvent.VK_C);
+        color.addActionListener(new ActionListener() {
+            public void actionPerformed(final ActionEvent theEvent) {
+                openChooser();
+            }
+        });
+        menu2.add(color);
+        return menu2;
+    }
+    /**
+     * a helper method that creates Tools menu.
+     * @return it returns JMenu
+     */
+    private JMenu createToolsMenu() {
+      //Create the menu bar.
+        final JMenuBar bar = new JMenuBar();
+      //Build the third menu.
+        final JMenu menu3 = new JMenu("Tools");
+        menu3.setMnemonic(KeyEvent.VK_T);
+        bar.add(menu3);
+        final ButtonGroup group = new ButtonGroup();
+        final JRadioButtonMenuItem rbMenuItem1 = new JRadioButtonMenuItem(PENCIL);
+        rbMenuItem1.setSelected(true);
+        group.add(rbMenuItem1);
+        rbMenuItem1.setMnemonic(KeyEvent.VK_P);
+        menu3.add(rbMenuItem1);
+        final JRadioButtonMenuItem rbMenuItem2 = new JRadioButtonMenuItem(LINE);
+        group.add(rbMenuItem2);
+        rbMenuItem2.setMnemonic(KeyEvent.VK_L);
+        menu3.add(rbMenuItem2);
+        final JRadioButtonMenuItem rbMenuItem3 = new JRadioButtonMenuItem(RECTANGLE);
+        group.add(rbMenuItem3);
+        rbMenuItem3.setMnemonic(KeyEvent.VK_R);
+        menu3.add(rbMenuItem3);
+        final JRadioButtonMenuItem rbMenuItem4 = new JRadioButtonMenuItem(ELLIPSE);
+        group.add(rbMenuItem4);
+        rbMenuItem4.setMnemonic(KeyEvent.VK_E);
+        menu3.add(rbMenuItem4);
+        return menu3;
+    }
+    /**
+     * a helper method that creates Help menu.
+     * @return it returns JMenu
+     */
+    private JMenu createHelpMenu() {
+        //Create the menu bar.
+        final JMenuBar bar = new JMenuBar();
+        //Build the fourth menu.
+        final JMenu menu4 = new JMenu("Help");
+        menu4.setMnemonic(KeyEvent.VK_H);
+        bar.add(menu4);
+        final JMenuItem about = new JMenuItem("About...");
+        about.setMnemonic(KeyEvent.VK_A);
+        about.addActionListener(new ActionListener() {
+            public void actionPerformed(final ActionEvent theEvent) {
+                helpMsg(); 
+            }
+        });
+        menu4.add(about);
+        return menu4;
+    }
+    /**
+     * a helper method that helps to create color chooser.
+     */
+    private void openChooser() {
+        JColorChooser.showDialog(this, "Choose your color", Color.black);
+      
+    }
+    /**
+     * a helper method that helps to pop up a message.
+     */
+    private void helpMsg() {
+        JOptionPane.showMessageDialog(this, "TCSS 305 PowerPaint, Autumn 2015");
+        
+    }
+    /**
+     * a helper method that helps to create tool bar.
+     * @return it returns JToolbBar
+     * 
+     */
+    public JToolBar createToolBar() {
+        //create a tool bar
+        final JToolBar toolbar = new JToolBar();
+      
+        final JToggleButton button1 = new JToggleButton(PENCIL);
+        button1.setMnemonic('P');
+        button1.setIcon(new ImageIcon(".\\images\\pencil_bw.gif"));
+        toolbar.add(button1);
+        final JToggleButton button2 = new JToggleButton(LINE);
+        button2.setMnemonic('L');
+        button2.setIcon(new ImageIcon(".\\images\\line_bw.gif"));
+        toolbar.add(button2);
+        final JToggleButton button3 = new JToggleButton(RECTANGLE);
+        button3.setMnemonic('R');
+        button3.setIcon(new ImageIcon(".\\images\\rectangle_bw.gif"));
+        toolbar.add(button3);
+        final JToggleButton button4 = new JToggleButton(ELLIPSE);
+        button4.setMnemonic('E');
+        button4.setIcon(new ImageIcon(".\\images\\ellipse_bw.gif"));
+        toolbar.add(button4);
+        return toolbar;
+    }
+    
+    
+    
+}

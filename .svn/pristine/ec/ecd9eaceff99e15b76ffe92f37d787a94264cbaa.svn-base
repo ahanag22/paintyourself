@@ -1,0 +1,57 @@
+package gui;
+
+
+
+import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
+import javax.swing.JToggleButton;
+import javax.swing.JToolBar;
+import painting.*;
+/**
+ * 
+ * @author Ahana Ghosh
+ * @version Autumn 2015
+ * A class that represents tool bar
+ */
+public class Tools {
+   
+    /**
+     * a method creates tool bar.
+     * @return it returns JToolbBar
+     * 
+     */
+    public JToolBar createToolBar(DrawingPanel panel) {
+        //create a tool bar
+        final JToolBar toolbar = new JToolBar();
+        final ButtonGroup group = new ButtonGroup();
+        final JToggleButton button1 = new JToggleButton("Pencil");
+        group.add(button1);
+        button1.setMnemonic('P');
+        button1.addActionListener(new CustomActionListener(1, panel));
+        button1.setIcon(new ImageIcon(".\\images\\pencil_bw.gif"));
+        toolbar.add(button1);
+        button1.setSelected(true);
+        final JToggleButton button2 = new JToggleButton("Line");
+        group.add(button2);
+        button2.setMnemonic('L');
+        button2.addActionListener(new CustomActionListener(2, panel));
+        button2.setIcon(new ImageIcon(".\\images\\line_bw.gif"));
+        toolbar.add(button2);
+        final JToggleButton button3 = new JToggleButton("Rectangle");
+        group.add(button3);
+        button3.setMnemonic('R');
+        button3.addActionListener(new CustomActionListener(3, panel));
+        button3.setIcon(new ImageIcon(".\\images\\rectangle_bw.gif"));
+        toolbar.add(button3);
+        final JToggleButton button4 = new JToggleButton("Ellipse");
+        group.add(button4);
+        button4.setMnemonic('E');
+        button4.addActionListener(new CustomActionListener(4, panel));
+        button4.setIcon(new ImageIcon(".\\images\\ellipse_bw.gif"));
+        toolbar.add(button4);
+        return toolbar;
+    }
+    }
+
+
+    

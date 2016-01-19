@@ -1,0 +1,22 @@
+package painting;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class CustomActionListener implements ActionListener
+{
+    private int type;
+    private DrawingPanel panel;
+
+    public CustomActionListener(int type, DrawingPanel d)
+    {
+        this.type = type;
+        this.panel = d;
+    }
+
+    public void actionPerformed(ActionEvent e)
+        {
+            panel.setType(this.type);
+        }
+}
+

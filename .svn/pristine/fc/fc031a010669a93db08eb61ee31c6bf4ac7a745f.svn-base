@@ -1,0 +1,367 @@
+package painting;
+
+import gui.DrawingFrame;
+import gui.Menu;
+import gui.Tools;
+
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.JColorChooser;
+import javax.swing.JPanel;
+import javax.swing.event.MouseInputAdapter;
+
+import shapes.Pencil;
+import shapes.ShapingToolAbstract;
+
+/**
+ * a class that represents a drawing panel.
+ * @author Ahana Ghosh
+ * @version Autumn 2015
+ *
+ */
+public class DrawingPanel extends JPanel {
+    /**  A generated serial version UID for object Serialization. */
+    private static final long serialVersionUID = 1L;
+    /** The default pane width. */
+    private static final int PANE_WIDTH = 400;
+    /** The default pane width. */
+    private static final int PANE_HEIGHT = 200;
+    /** the x coordinate. */
+    private int myX1;
+    /** the x coordinate. */
+    private int myX2;
+    /** the y coordinate. */
+    private int myY1;
+    /** the y coordinate. */
+    private int myY2;
+    /** the current tool in use. */
+    private ShapingToolAbstract myCurrentTool;
+    /** initially selected color. */
+    private Color myC = Color.BLACK;
+    /** initially selected thickness. */
+    private int myWidth = 1;
+    /** The flag that identifies if drag started. */
+    private boolean myDrageStarged;
+    /** The flag that identifies if grid is visible. */
+    private boolean myGridStateVisible;
+
+    /** an ArrayList for drawn shapes. */
+    private final List<ShapingToolAbstract> myDrawnFigures;
+    
+    /** an ArrayList for WithDrawn Figures. */
+    private final List<ShapingToolAbstract> myWithdrawnFigures;
+    
+    /** a menu bar. */
+    private Menu myMenubar;
+    /** a tool bar. */
+    private Tools myToolbar;
+  
+    /**
+     * creating the constructor.
+     */
+    public DrawingPanel() {
+        super();
+       
+        myDrawnFigures = new ArrayList<ShapingToolAbstract>();
+        myWithdrawnFigures = new ArrayList<ShapingToolAbstract>();
+    }
+    /**
+     * a method that sets up the panel.
+     */
+    public void init() {
+        this.myCurrentTool = new Pencil();
+          
+        setBackground(Color.WHITE);
+        setPreferredSize(new Dimension(PANE_WIDTH, PANE_HEIGHT));
+        final MouseInputAdapter mia = new MyMouseInputAdapter();
+          
+        //Register for mouse events on the panel.
+        addMouseListener(mia);
+        addMouseMotionListener(mia);
+        setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+    }
+    /**
+     * a method that sets the menu bar.
+     * @param theM is a menu.
+     */
+    public void linkMenuBar(final Menu theM) {
+    
+        this.myMenubar = theM;
+    }
+    
+    /**
+     * this method sets the current tool bar.
+     * @param theT is tools
+     */
+    public void linkToolBar(final Tools theT) {
+        this.myToolbar = theT;
+    }
+    /**
+     * sets the current state of the menu bar and tool bar to the panel.
+     * @param theT is an  AbstractShapingTool.
+     */
+    public void setCurrentShapingTool(final ShapingToolAbstract theT) {
+        this.myCurrentTool = theT;
+        this.myMenubar.setSelected(this.myCurrentTool);
+        this.myToolbar.setSelected(this.myCurrentTool);
+    }
+    /**
+     * 
+     * @return AbstractShapingTool
+     */
+    public ShapingToolAbstract getCurrentTool() {
+        return myCurrentTool;
+    }
+    /**
+     * this method sets the current color.
+     */
+    public void setColor() {
+        this.myC = openChooser();
+    }
+    /**
+     * returns the current color in use.
+     * @return Color.
+     */
+    public Color getColor() {
+        return this.myC; 
+    }
+    /**
+     * this method opens a color chooser.
+     * initially selected color is black.
+     * @return Color
+     */
+    public Color openChooser() {
+        return JColorChooser.showDialog(new DrawingFrame(), 
+                                        "Choose your color", Color.black);       
+    }
+    /**
+     * setter method.
+     * @param theVal is a boolean.
+     */
+    public void setDraggedState(final boolean theVal) {
+        this.myDrageStarged = theVal;
+    }
+    /**
+     * a getter method.
+     * @return a boolean.
+     */
+    public boolean isGetDraggedState() {
+        return this.myDrageStarged;
+    }
+    
+    /**
+     * this method sets the thickness of the shapes.
+     * @param theWidth is an int.
+     */
+    public void setWidth(final int theWidth) {
+        this.myWidth = theWidth;
+    }
+    /**
+     * this method changes the grid state.
+     */
+    public void changeGridState() {
+        this.myGridStateVisible = !this.myGridStateVisible;
+    }    
+    /**
+     * this methods re-does last undid figure.
+     */
+    public void redoLast() {
+        if (!this.myWithdrawnFigures.isEmpty()) {
+            // Add to the drawn figures list
+            this.myDrawnFigures.add(
+                this.myWithdrawnFigures.get(this.myWithdrawnFigures.size() - 1));
+            
+            // removes from the withdrawn figures list
+            this.myWithdrawnFigures.remove(this.myWithdrawnFigures.size() - 1);
+            
+            this.myMenubar.setUndoState(true);
+            this.myMenubar.setUndoAllState(true);
+            
+            if (this.myWithdrawnFigures.isEmpty()) {
+                this.myMenubar.setRedoState(false);
+            }
+            
+            repaint();
+        }
+    }   
+    /**
+     * this method un-does last did figure.
+     */
+    public void undoLast() {
+        if (!this.myDrawnFigures.isEmpty()) {
+            this.myWithdrawnFigures.add(
+                this.myDrawnFigures.get(this.myDrawnFigures.size() - 1));
+            this.myDrawnFigures.remove(this.myDrawnFigures.size() - 1);
+            
+            this.myMenubar.setRedoState(true);
+            
+            if (this.myDrawnFigures.isEmpty()) {
+                this.myMenubar.setUndoState(false);
+                this.myMenubar.setUndoAllState(false);
+            }
+            
+            repaint();
+        }
+    }
+    
+    /**
+     * sets undo button state.
+     * @param theFlag is a boolean.
+     */
+    private void setUndoItemState(final boolean theFlag) {        
+        this.myMenubar.getUndo().setEnabled(theFlag);
+    }
+    /**
+     * removes the last drawn shape from the AraryList.
+     */
+    private void removeLast() {
+        if (this.myDrawnFigures.size() > 0) {
+            this.myDrawnFigures.remove(this.myDrawnFigures.size() - 1);
+        }
+    }  
+    /**
+     * adds the newly drawn shape to the ArrayList.
+     */
+    private void addThis() {
+        this.myCurrentTool.setColor(this.myC);
+        this.myCurrentTool.setWidth(this.myWidth);
+        this.myCurrentTool.addPoint(myX1, myY1);
+        this.myCurrentTool.addPoint(myX2, myY2);
+        this.myDrawnFigures.add(this.myCurrentTool);
+        this.myMenubar.setUndoState(true);
+        
+        try {
+            this.myCurrentTool = this.myCurrentTool.getClass().newInstance();
+        } catch (final InstantiationException | IllegalAccessException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+   /**
+    * adds the point.
+    */
+    private void addThisToLast() {
+        this.myDrawnFigures.get(this.myDrawnFigures.size() - 1).addPoint(this.myX2, this.myY2);
+    }
+    /**
+     * sets dragging.
+     * @param theFlag is a boolean.
+     */
+    private void setDragStarted(final boolean theFlag) {
+        this.myDrageStarged = theFlag;
+    }
+    
+    /**
+     * an overridden method used to paint shapes.
+     * @param theGraphics is a Graphics. 
+     */
+    @Override
+    public void paintComponent(final Graphics theGraphics) {
+        super.paintComponent(theGraphics);
+        
+        for (final ShapingToolAbstract f: this.myDrawnFigures) {
+            f.draw(theGraphics);
+        }
+
+        if (myGridStateVisible) {
+            final int size = 10;                        
+            final int count1 = this.getWidth() / size;
+            final int count2 = this.getHeight() / size;
+            
+            for (int i = 0; i < count1; i++) {      
+                for (int j = 0; j < count2; j++) {      
+                    final int startx = i * size;
+                    final int starty = j * size;
+                    
+                    final Rectangle grid = new Rectangle(startx, starty, size, size);   
+                    theGraphics.setColor(Color.GRAY);
+                    ((Graphics2D) theGraphics).setStroke(new BasicStroke(1));
+                    ((Graphics2D) theGraphics).draw(grid);
+                }        
+            }            
+        }
+    }
+   /**
+    * clears all the drawn shapes.
+    */
+    public void clearAllDrawings() {
+        this.myDrawnFigures.clear();
+        repaint();
+        setUndoItemState(false);
+    }
+    /** an inner class to demonstrate the mouse events. */
+    class MyMouseInputAdapter extends MouseInputAdapter {
+        
+        //these methods are found in MouseListener
+        @Override
+        public void mousePressed(final MouseEvent theM) {
+            myX1 = theM.getX();
+            myY1 = theM.getY();
+            repaint();
+        }
+        
+        @Override
+        public void mouseReleased(final MouseEvent theM) {
+            myX2 = theM.getX();
+            myY2 = theM.getY();                  
+          
+            setDragStarted(false);
+         
+        }
+        
+        @Override
+        public void mouseEntered(final MouseEvent theEvent) {
+           
+        }
+        
+        @Override
+        public void mouseExited(final MouseEvent theEvent) {
+            
+        }
+        
+        @Override
+        public void mouseClicked(final MouseEvent theEvent) {
+            
+        }
+        
+        //These methods are found in MouseMotionListener
+        @Override
+        public void mouseMoved(final MouseEvent theEvent) {
+          
+        }
+        
+        @Override
+        public void mouseDragged(final MouseEvent theM) {
+            myX2 = theM.getX();
+            myY2 = theM.getY();
+            
+            if (myDrageStarged) {
+                final ShapingToolAbstract s = getCurrentTool();
+                if (s instanceof Pencil) {
+                    addThisToLast();
+                } else { 
+                    removeLast(); 
+                    addThis();
+                }
+            } else {
+                addThis();                                                  
+            }
+            
+            repaint();                     
+            setDragStarted(true);                     
+            setUndoItemState(true);
+        }
+     
+    }
+}
+
+

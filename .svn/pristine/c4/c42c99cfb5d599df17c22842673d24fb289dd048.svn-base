@@ -1,0 +1,108 @@
+package painting;
+
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.geom.Line2D;
+
+import javax.swing.JPanel;
+/**
+ * A class that represents a drawing panel.
+ * @author Ahana Ghosh
+ * @version Autumn 2015
+ */
+public class DrawingPanel extends JPanel implements MouseMotionListener, MouseListener {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+          
+  
+    /** The default pane width. */
+    private static final int PANE_WIDTH = 400;
+    
+    /** The default pane width. */
+    private static final int PANE_HEIGHT = 200;
+    /** A point for drawing a line. */
+    private Point myPoint1;
+    /** A point for drawing a line. */
+    private Point myPoint2;
+    /** myLine2d for to draw a line . */
+    private Line2D myLine2d;
+
+     /**
+     * 
+     */
+    public DrawingPanel() {
+        super();
+        setPreferredSize(new Dimension(PANE_WIDTH, PANE_HEIGHT));
+        setBackground(Color.WHITE);
+        setOpaque(true);
+        addMouseListener(this);
+        addMouseMotionListener(this);
+    }
+ 
+    /**
+     * @param theGraphics is Graphics.
+     * @return it returns void.
+     */
+   
+    @Override
+    public void paintComponent(final Graphics theGraphics) {
+        super.paintComponent(theGraphics);
+        final Graphics2D g2d = (Graphics2D) theGraphics;
+        if (myPoint1 != null && myPoint2 != null) {
+
+            g2d.setPaint(Color.BLACK);
+            g2d.setStroke(new BasicStroke(1f));
+            g2d.draw(myLine2d);
+
+        }
+        
+       
+    }
+
+    @Override
+    public void mouseClicked(final MouseEvent arg0) {
+    }
+
+    @Override
+    public void mouseEntered(final MouseEvent arg0) {
+        
+    }
+
+    @Override
+    public void mouseExited(final MouseEvent arg0) {
+        
+    }
+
+    @Override
+    public void mousePressed(final MouseEvent theEvent) {
+        myPoint1 = theEvent.getPoint();
+    }
+
+    @Override
+    public void mouseReleased(final MouseEvent theEvent) {
+        
+    }
+
+    @Override
+    public void mouseDragged(final MouseEvent theEvent) {
+        myPoint2 = theEvent.getPoint();
+        myLine2d = new Line2D.Double(myPoint1, myPoint2); 
+        repaint();
+        
+    }
+
+    @Override
+    public void mouseMoved(final MouseEvent arg0) {
+     
+    }
+
+}

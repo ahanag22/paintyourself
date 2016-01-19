@@ -1,0 +1,27 @@
+package painting;
+
+import java.awt.Color;
+
+public class ColorAction {
+
+    public ColorAction() {
+        // TODO Auto-generated constructor stub
+    }
+     public void ChangeBackGroundColor(DrawingPanel d){
+      
+     }
+}
+//things need to do:
+
+// I need to reorganize the classes into different packages  
+// need to write setters and getters for tool, thickness, color.
+//for grid need to create two for loops, one for height and one for width and need to make sure that grid is always be on the top.
+  // for grid need to use line2D class.
+//packages should be like named as GUI, model, colorAction etc.
+//public void createGrid(){
+    //int currentSize = this.getWidth();
+    //int numberOfLines = currentSize / 10;
+    //for(int i= 0; i < numberOfLines; i++){
+        
+    //}
+//}
